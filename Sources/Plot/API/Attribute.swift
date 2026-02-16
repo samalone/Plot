@@ -64,10 +64,12 @@ extension Attribute: NodeConvertible {
 
 extension Attribute: AnyAttribute {
     func render() -> String {
+        let sanitizedName = name.sanitizedForName()
+
         guard let value = nonEmptyValue else {
-            return ignoreIfValueIsEmpty ? "" : name
+            return ignoreIfValueIsEmpty ? "" : sanitizedName
         }
 
-        return "\(name)=\"\(value)\""
+        return "\(sanitizedName)=\"\(value)\""
     }
 }
