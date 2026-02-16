@@ -44,11 +44,12 @@ internal final class ElementRenderingBuffer {
     }
 
     func flush() -> String {
-        guard !element.name.isEmpty else { return body }
+        let sanitizedName = element.name.sanitizedForName()
+        guard !sanitizedName.isEmpty else { return body }
 
         let whitespace = indentation?.string ?? ""
         let padding = element.paddingCharacter.map(String.init) ?? ""
-        var openingTag = "\(whitespace)<\(padding)\(element.name)"
+        var openingTag = "\(whitespace)<\(padding)\(sanitizedName)"
 
         for attribute in attributes {
             let string = attribute.render()
@@ -69,7 +70,7 @@ internal final class ElementRenderingBuffer {
                 string.append("\n\(whitespace)")
             }
 
-            return string + "</\(element.name)>"
+            return string + "</\(sanitizedName)>"
         case .neverClosed:
             return openingTag + openingTagSuffix + body
         case .selfClosing:

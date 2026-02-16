@@ -83,6 +83,36 @@ final class NodeTests: XCTestCase {
             #"value="&quot;&gt;&lt;img src=x onerror=alert(1)&gt;&lt;input value=&quot;""#
         )
     }
+    
+    func testSanitizingElementName() {
+        let node = Node<Any>.element(named: "div onclick=\"alert(1)\"")
+        XCTAssertEqual(node.render(), #"<divonclickalert1></divonclickalert1>"#)
+    }
+
+    func testSanitizingElementNameWithAngleBrackets() {
+        let node = Node<Any>.element(named: "div><script>alert(1)</script><div")
+        XCTAssertEqual(node.render(), "<divscriptalert1scriptdiv></divscriptalert1scriptdiv>")
+    }
+
+    func testSanitizingElementNamePreservesValidCharacters() {
+        let node = Node<Any>.element(named: "my-element_2.0")
+        XCTAssertEqual(node.render(), "<my-element_2.0></my-element_2.0>")
+    }
+
+    func testSanitizingElementNameStripsLeadingDigits() {
+        let node = Node<Any>.element(named: "1div")
+        XCTAssertEqual(node.render(), "<div></div>")
+    }
+
+    func testSanitizingAttributeName() {
+        let node = Node<Any>.attribute(named: "\" onclick=\"alert(1)", value: "x")
+        XCTAssertEqual(node.render(), #"onclickalert1="x""#)
+    }
+
+    func testSanitizingAttributeNamePreservesValidCharacters() {
+        let node = Node<Any>.attribute(named: "data-my_attr.v2", value: "x")
+        XCTAssertEqual(node.render(), #"data-my_attr.v2="x""#)
+    }
 
     func testCustomElementWithCustomAttribute() {
         let node = Node<Any>.element(named: "custom", attributes: [

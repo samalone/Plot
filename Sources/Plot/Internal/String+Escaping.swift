@@ -9,6 +9,26 @@ internal extension String {
         escaped().replacingOccurrences(of: "\"", with: "&quot;")
             .replacingOccurrences(of: "'", with: "&#39;")
     }
+    
+    /// Strips characters that are not valid in XML/HTML element or attribute
+    /// names, preventing malformed markup when a name contains unexpected
+    /// characters. Per the XML specification, names may start with a letter,
+    /// underscore, colon, or exclamation mark (for declarations like
+    /// `!DOCTYPE`), and may continue with those characters plus digits,
+    /// hyphens, and periods.
+    func sanitizedForName() -> String {
+        var result = ""
+
+        for character in self {
+            if character.isLetter || character == "_" || character == ":" || character == "!" {
+                result.append(character)
+            } else if !result.isEmpty && (character.isNumber || character == "-" || character == ".") {
+                result.append(character)
+            }
+        }
+
+        return result
+    }
 
     func escaped() -> String {
         var pendingAmpersandString: String?
